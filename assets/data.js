@@ -308,4 +308,8 @@ const CATEGORIES = [
   }
 ];
 
-const VOTERS = [];
+const VOTERS = [
+  { name: 'Conrado', initials: 'CON' },
+  { name: 'Javi', initials: 'JAV' },
+  { name: 'Jordi', initials: 'JOR' }
+];

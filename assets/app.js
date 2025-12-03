@@ -12,14 +12,21 @@ function loadState() {
 	const rawWin = localStorage.getItem(STORAGE_KEYS.winners);
 	const rawVoters = localStorage.getItem(STORAGE_KEYS.voters);
 	try {
+		// Si no hay voters guardados o está vacío, usar los predefinidos de VOTERS
+		let voters = rawVoters ? JSON.parse(rawVoters) : [];
+		// Si no hay voters, usar los predefinidos
+		if (voters.length === 0 && VOTERS.length > 0) {
+			voters = VOTERS;
+			localStorage.setItem(STORAGE_KEYS.voters, JSON.stringify(VOTERS));
+		}
 		return {
 			predictions: rawPred ? JSON.parse(rawPred) : {},
 			winners: rawWin ? JSON.parse(rawWin) : {},
-			voters: rawVoters ? JSON.parse(rawVoters) : []
+			voters: voters
 		}
 	} catch (e) {
 		console.error('Error parseando localStorage', e);
-		return { predictions: {}, winners: {}, voters: [] };
+		return { predictions: {}, winners: {}, voters: VOTERS };
 	}
 }
 function saveState(state) {
@@ -31,10 +38,9 @@ function saveState(state) {
 // inicializa
 let STATE = loadState();
 
-// Obtener lista de votantes (combinando VOTERS originales + custom)
+// Obtener lista de votantes
 function getVoters() {
-	const customVoters = STATE.voters.map(v => v.initials);
-	return [...VOTERS, ...customVoters];
+	return STATE.voters.map(v => v.initials);
 }
 
 // Obtener nombre formateado del votante
