@@ -311,5 +311,6 @@ const CATEGORIES = [
 const VOTERS = [
   { name: 'Conrado', initials: 'CON' },
   { name: 'Javi', initials: 'JAV' },
-  { name: 'Jordi', initials: 'JOR' }
+  { name: 'Jordi', initials: 'JOR' },
+  { name: 'Antonio', initials: 'ANT' }
 ];

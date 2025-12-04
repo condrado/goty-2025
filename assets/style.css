@@ -51,7 +51,25 @@ button {
   --accent-aqua: #2DCCCD;
   --text-primary: #e6eef8;
   --text-secondary: #94a3b8;
-  --spacing-unit: 8px
+  --spacing-unit: 8px;
+  --border-color: rgba(255, 255, 255, 0.1);
+  --hover-bg: rgba(255, 255, 255, 0.05);
+}
+
+/* Tema light */
+:root.light-theme {
+  --bg: #f8fafc;
+  --card: #ffffff;
+  --accent: #f59e0b;
+  --muted: #0369a1;
+  --glass: rgba(3, 105, 161, 0.08);
+  --primary-dark: #e0f2fe;
+  --primary-blue: #0ea5e9;
+  --accent-aqua: #06b6d4;
+  --text-primary: #0b1220;
+  --text-secondary: #0369a1;
+  --border-color: rgba(3, 105, 161, 0.2);
+  --hover-bg: rgba(3, 105, 161, 0.12);
 }
 
 * {
@@ -67,7 +85,7 @@ body,
 
 body {
   margin: 0;
-  background-color: #071124;
+  background-color: var(--bg);
   background-image:
     linear-gradient(180deg, rgba(7, 17, 36, 0.9) 0%, rgba(11, 18, 32, 0.92) 100%),
     url('../assets/images/goty-bg.png');
@@ -75,9 +93,15 @@ body {
   background-position: center;
   background-repeat: no-repeat;
   background-attachment: fixed;
-  color: #e6eef8;
+  color: var(--text-primary);
   padding: 24px;
   min-height: 100vh
+}
+
+.light-theme body {
+  background-image:
+    linear-gradient(180deg, rgba(248, 250, 252, 0.95) 0%, rgba(241, 245, 249, 0.97) 100%),
+    url('../assets/images/goty-bg.png');
 }
 
 header {
@@ -107,6 +131,18 @@ header {
   flex-shrink: 0;
 }
 
+.tga-icon-light {
+  display: none;
+}
+
+.light-theme .tga-icon-dark {
+  display: none;
+}
+
+.light-theme .tga-icon-light {
+  display: block;
+}
+
 .header-text {
   display: flex;
   flex-direction: column;
@@ -133,7 +169,7 @@ h1 {
 }
 
 .content {
-  background: rgba(255, 255, 255, 0.02);
+  background: var(--glass);
   padding: 24px;
   border-radius: 16px
 }
@@ -142,7 +178,7 @@ h1 {
   background: var(--card);
   padding: 16px 16px 24px 16px;
   border-radius: 16px;
-  border: 1px solid rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--border-color);
   border-bottom: none;
   max-height: 152px;
   position: fixed;
@@ -176,7 +212,7 @@ nav.open {
 
 .nav-fixed {
   flex-shrink: 0;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  border-bottom: 1px solid var(--border-color);
   padding-bottom: 8px;
   margin-bottom: 8px
 }
@@ -189,7 +225,7 @@ nav.open {
 
 .menu-toggle {
   background: transparent;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1px solid var(--border-color);
   padding: 8px;
   border-radius: 8px;
   cursor: pointer;
@@ -212,7 +248,7 @@ nav.open {
 }
 
 .menu-toggle:hover {
-  border-color: rgba(255, 255, 255, 0.2)
+  border-color: var(--muted)
 }
 
 .nav-overlay {
@@ -247,6 +283,12 @@ nav a.active {
   color: #fff
 }
 
+.light-theme nav a.active {
+  background: linear-gradient(90deg, rgba(6, 182, 212, 0.2), rgba(6, 182, 212, 0.1));
+  color: var(--text-primary);
+  border-color: var(--accent-aqua);
+}
+
 nav a.has-winner .nav-winner-icon {
   display: inline-flex;
   align-items: center;
@@ -259,6 +301,21 @@ nav a.has-winner .nav-winner-icon {
   font-size: 12px;
   font-weight: bold;
   flex-shrink: 0;
+}
+
+.card.has-winner .nav-winner-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  background-color: #10b981;
+  color: white;
+  border-radius: 50%;
+  font-size: 12px;
+  font-weight: bold;
+  flex-shrink: 0;
+  margin-right: 8px;
 }
 
 .category-winner-label .nav-winner-icon {
@@ -374,7 +431,7 @@ nav a.nav-link-row {
   gap: 24px;
   margin-bottom: 24px;
   padding-bottom: 24px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  border-bottom: 1px solid var(--border-color);
 }
 
 .header-wrapper h2 {
@@ -397,7 +454,7 @@ nav a.nav-link-row {
 
 .category-search-container {
   position: relative;
-  width: 300px;
+  width: 250px;
 }
 
 /* Clases para ranking breakdown */
@@ -413,7 +470,7 @@ nav a.nav-link-row {
 .page-title {
   margin-bottom: 24px;
   padding-bottom: 24px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  border-bottom: 1px solid var(--border-color);
   display: flex;
   align-items: center;
   gap: 12px
@@ -428,6 +485,12 @@ nav a.nav-link-row {
   box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
   border-radius: 8px;
   padding: 8px;
+}
+
+.category-winner-label {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .category-winner-label .winner-name {
@@ -457,6 +520,10 @@ nav a.nav-link-row {
   align-items: center;
   border: 1px solid rgba(255, 255, 255, 0.03);
   cursor: default
+}
+
+.light-theme .card {
+  border: 1px solid rgba(3, 105, 161, 0.2);
 }
 
 .card.winner {
@@ -495,7 +562,10 @@ nav a.nav-link-row {
 
 .meta h3 {
   margin: 0;
-  font-size: 16px
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
 .controls {
@@ -526,8 +596,8 @@ input[type="radio"] {
   border-radius: 8px;
   font-size: 14px;
   font-weight: 600;
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: var(--hover-bg);
+  border: 1px solid var(--border-color);
   color: var(--text-secondary);
   cursor: pointer;
   transition: all 0.2s ease;
@@ -537,7 +607,7 @@ input[type="radio"] {
 }
 
 .winner-btn:hover {
-  background: rgba(255, 255, 255, 0.08);
+  background: var(--glass);
   border-color: var(--accent-aqua);
   color: var(--text-primary)
 }
@@ -547,8 +617,8 @@ input[type="radio"] {
   border-radius: 8px;
   font-size: 14px;
   font-weight: 500;
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: var(--hover-bg);
+  border: 1px solid var(--border-color);
   color: var(--text-secondary);
   cursor: pointer;
   transition: all 0.2s ease;
@@ -558,7 +628,7 @@ input[type="radio"] {
 
 .sort-select:hover,
 .sort-select:focus {
-  background: rgba(255, 255, 255, 0.08);
+  background: var(--glass);
   border-color: var(--accent-aqua);
   color: var(--text-primary)
 }
@@ -589,8 +659,8 @@ input[type="radio"] {
   align-items: center;
   padding: 12px 16px;
   border-radius: 8px;
-  background: rgba(255, 255, 255, 0.02);
-  border: 1px solid rgba(255, 255, 255, 0.03);
+  background: var(--glass);
+  border: 1px solid var(--border-color);
   flex: 1;
   text-align: center;
   gap: 4px
@@ -600,7 +670,7 @@ input[type="radio"] {
 .category-header {
   margin-bottom: 24px;
   padding-bottom: 24px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.06)
+  border-bottom: 1px solid var(--border-color)
 }
 
 .category-header-top {
@@ -642,8 +712,8 @@ input[type="radio"] {
   border-radius: 8px;
   font-size: 14px;
   font-weight: 600;
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: var(--hover-bg);
+  border: 1px solid var(--border-color);
   color: var(--text-secondary);
   cursor: pointer;
   transition: all 0.2s ease;
@@ -655,7 +725,7 @@ input[type="radio"] {
 }
 
 .category-nav-btn:hover {
-  background: rgba(255, 255, 255, 0.08);
+  background: var(--glass);
   border-color: var(--accent-aqua);
   color: var(--text-primary)
 }
@@ -731,18 +801,17 @@ input[type="radio"] {
 
 .winner-badge {
   position: absolute;
-  top: 12px;
-  right: 12px;
+  top: 20px;
+  right: 16px;
   background: #10b981;
   color: #ffffff;
-  padding: 8px 14px;
-  border-radius: 8px;
-  font-size: 13px;
-  font-weight: 700;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
   box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
   display: flex;
   align-items: center;
-  gap: 4px
+  justify-content: center;
 }
 
 .nominee-info {
@@ -760,7 +829,10 @@ input[type="radio"] {
   margin: 0;
   line-height: 1.4;
   min-height: 44px;
-  max-width: calc(100% - 110px)
+  max-width: calc(100% - 50px);
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
 .nominee-predictions {
@@ -774,8 +846,8 @@ input[type="radio"] {
   border-radius: 8px;
   font-size: 13px;
   font-weight: 500;
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: var(--glass);
+  border: 1px solid var(--border-color);
   color: var(--text-secondary);
   cursor: pointer;
   transition: all 0.2s ease;
@@ -785,8 +857,8 @@ input[type="radio"] {
 }
 
 .voter-chip:hover {
-  background: rgba(255, 255, 255, 0.06);
-  border-color: rgba(255, 255, 255, 0.2)
+  background: var(--hover-bg);
+  border-color: var(--muted)
 }
 
 .voter-chip.active {
@@ -801,8 +873,8 @@ input[type="radio"] {
   width: 100%;
   padding: 8px 12px;
   border-radius: 8px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--border-color);
+  background: var(--hover-bg);
   color: var(--text-primary);
   font-size: 14px;
   outline: none;
@@ -812,7 +884,7 @@ input[type="radio"] {
 
 .category-search-input:focus {
   border-color: var(--accent-aqua);
-  background: rgba(255, 255, 255, 0.06);
+  background: var(--glass);
 }
 
 .category-search-input::placeholder {
@@ -945,7 +1017,7 @@ input[type="radio"] {
   justify-content: space-between;
   align-items: center;
   padding: 12px;
-  background: rgba(255, 255, 255, 0.03);
+  background: var(--glass);
   border-radius: 8px;
   margin-bottom: 8px;
 }
@@ -992,10 +1064,10 @@ input[type="radio"] {
 .add-voter-form input {
   flex: 1;
   padding: 10px 12px;
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: var(--hover-bg);
+  border: 1px solid var(--border-color);
   border-radius: 8px;
-  color: #fff;
+  color: var(--text-primary);
   font-size: 14px;
   height: 38px;
 }
@@ -1006,8 +1078,8 @@ input[type="radio"] {
 }
 
 .icon-btn {
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: var(--hover-bg);
+  border: 1px solid var(--border-color);
   border-radius: 8px;
   width: 38px;
   height: 38px;
@@ -1020,9 +1092,9 @@ input[type="radio"] {
 }
 
 .icon-btn:hover {
-  background: rgba(255, 255, 255, 0.1);
-  border-color: rgba(255, 255, 255, 0.2);
-  color: #fff;
+  background: var(--glass);
+  border-color: var(--muted);
+  color: var(--text-primary);
 }
 
 /* Custom scrollbar */
@@ -1046,10 +1118,27 @@ input[type="radio"] {
   background: rgba(255, 255, 255, 0.15);
 }
 
+/* Light theme scrollbar */
+.light-theme ::-webkit-scrollbar-track {
+  background: rgba(3, 105, 161, 0.05);
+}
+
+.light-theme ::-webkit-scrollbar-thumb {
+  background: rgba(3, 105, 161, 0.3);
+}
+
+.light-theme ::-webkit-scrollbar-thumb:hover {
+  background: rgba(3, 105, 161, 0.5);
+}
+
 /* Firefox */
 * {
   scrollbar-width: thin;
   scrollbar-color: rgba(255, 255, 255, 0.1) rgba(255, 255, 255, 0.02);
+}
+
+.light-theme * {
+  scrollbar-color: rgba(3, 105, 161, 0.3) rgba(3, 105, 161, 0.05);
 }
 
 @media print {

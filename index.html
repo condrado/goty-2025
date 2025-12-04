@@ -20,7 +20,8 @@
         </button>
       </div>
       <div class="header-title">
-        <img src="https://cdn.thegameawards.com//frontend/svgs/tga_icon_2024.svg" alt="TGA Icon" class="tga-icon">
+        <img src="assets/images/tga_icon_original.svg" alt="TGA Icon" class="tga-icon tga-icon-dark">
+        <img src="assets/images/tga_icon_blue.svg" alt="TGA Icon" class="tga-icon tga-icon-light">
         <div class="header-text">
           <h1>The Game Awards 2025</h1>
           <div class="header-subtitle">Haz tus predicciones y compite con tus amigos</div>
@@ -32,6 +33,9 @@
           <div class="category-search-results" id="headerSearchResults"></div>
         </div>
         <div style="display: flex; gap: 8px; align-items: center;">
+          <button id="themeToggle" class="icon-btn" aria-label="Cambiar tema" title="Cambiar tema">
+            <i data-lucide="sun" style="width:18px;height:18px"></i>
+          </button>
           <button id="fullscreenToggle" class="icon-btn" aria-label="Pantalla completa" title="Pantalla completa">
             <i data-lucide="expand" style="width:18px;height:18px"></i>
           </button>

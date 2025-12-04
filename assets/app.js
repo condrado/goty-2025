@@ -4,7 +4,8 @@ const STORAGE_KEYS = {
 	predictions: 'tga2025_predictions', // formato: { categoryId: { voterName: gameId } }
 	winners: 'tga2025_winners', // formato: { categoryId: gameId }
 	voters: 'tga2025_voters', // formato: [{ name: string, initials: string }]
-	sortOrder: 'tga2025_sortOrder' // formato: 'event' | 'alphabetical'
+	sortOrder: 'tga2025_sortOrder', // formato: 'event' | 'alphabetical'
+	theme: 'tga2025_theme' // formato: 'dark' | 'light'
 };
 
 // carga/guarda
@@ -205,7 +206,7 @@ function renderHome() {
 	resetBtn.textContent = 'Restablecer todo';
 	resetBtn.addEventListener('click', () => {
 		if (!confirm('¿Restablecer todas las predicciones, ganadores y participantes? (se borrará todo del localStorage)')) return;
-		STATE = { predictions: {}, winners: {}, voters: [] }; 
+		STATE = { predictions: {}, winners: {}, voters: VOTERS, sortOrder: 'event' }; 
 		saveState(STATE); 
 		route();
 	});
@@ -243,7 +244,19 @@ function renderHome() {
 		
 		const m = document.createElement('div');
 		m.style.flex = '1';
-		const title = document.createElement('h3'); title.textContent = cat.title;
+		const title = document.createElement('h3'); 
+		
+		// Añadir icono de check si tiene ganador
+		if (hasWinner) {
+			const winnerIcon = document.createElement('span');
+			winnerIcon.className = 'nav-winner-icon';
+			winnerIcon.textContent = '✓';
+			title.appendChild(winnerIcon);
+		}
+		
+		const titleText = document.createTextNode(cat.title);
+		title.appendChild(titleText);
+		
 		const info = document.createElement('div'); info.style.color = 'var(--muted)'; info.style.fontSize = '13px';
 		const total = cat.games.length;
 		const winnerAssigned = hasWinner ? ' · Ganador marcado' : '';
@@ -351,11 +364,11 @@ function renderCategory(catId) {
 		title.className = 'nominee-title';
 		title.textContent = gname;
 
-		// Badge de ganador
+		// Badge de ganador (solo icono)
 		if (isWinner) {
 			const winnerBadge = document.createElement('div');
 			winnerBadge.className = 'winner-badge';
-			winnerBadge.innerHTML = '<i data-lucide="trophy" class="lucide-icon-sm"></i> Ganador';
+			winnerBadge.innerHTML = '<i data-lucide="trophy" class="lucide-icon-sm"></i>';
 			info.appendChild(winnerBadge);
 		}
 
@@ -456,10 +469,18 @@ function renderRanking() {
 		
 		const titleBold = document.createElement('strong'); titleBold.textContent = cat.title;
 		total.appendChild(titleBold);
-		const separator = document.createElement('span'); separator.className = 'category-separator'; separator.textContent = '|';
-		total.appendChild(separator);
-		const winnerSpan = document.createElement('span'); winnerSpan.className = 'winner-name'; winnerSpan.textContent = w ? guessNameFromId(w) : '—';
-		total.appendChild(winnerSpan);
+		
+		// Solo mostrar separador y ganador si hay ganador
+		if (w) {
+			const separator = document.createElement('span'); 
+			separator.className = 'category-separator'; 
+			separator.textContent = '|';
+			total.appendChild(separator);
+			const winnerSpan = document.createElement('span'); 
+			winnerSpan.className = 'winner-name'; 
+			winnerSpan.textContent = guessNameFromId(w);
+			total.appendChild(winnerSpan);
+		}
 		row.appendChild(total);
 		const small = document.createElement('div'); small.className = 'rank-breakdown-row';
 		getVoters().forEach(v => {
@@ -724,6 +745,42 @@ addVoterBtn.addEventListener('click', () => {
 	route(); // Re-renderizar vista actual
 });
 
+// Theme toggle
+const themeToggle = document.getElementById('themeToggle');
+const root = document.documentElement;
+
+function updateThemeIcon(theme) {
+	// Vaciar el botón y recrear el icono
+	const iconName = theme === 'light' ? 'moon' : 'sun';
+	themeToggle.innerHTML = `<i data-lucide="${iconName}" style="width:18px;height:18px"></i>`;
+	lucide.createIcons();
+}
+
+function loadTheme() {
+	const savedTheme = localStorage.getItem(STORAGE_KEYS.theme) || 'dark';
+	if (savedTheme === 'light') {
+		root.classList.add('light-theme');
+	} else {
+		root.classList.remove('light-theme');
+	}
+	updateThemeIcon(savedTheme);
+}
+
+themeToggle.addEventListener('click', () => {
+	const isLight = root.classList.contains('light-theme');
+	
+	if (isLight) {
+		root.classList.remove('light-theme');
+		localStorage.setItem(STORAGE_KEYS.theme, 'dark');
+		updateThemeIcon('dark');
+	} else {
+		root.classList.add('light-theme');
+		localStorage.setItem(STORAGE_KEYS.theme, 'light');
+		updateThemeIcon('light');
+	}
+});
+
 // inicial render
+loadTheme();
 route();
 updateRankingSidebar();
