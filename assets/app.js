@@ -3,7 +3,8 @@
 const STORAGE_KEYS = {
 	predictions: 'tga2025_predictions', // formato: { categoryId: { voterName: gameId } }
 	winners: 'tga2025_winners', // formato: { categoryId: gameId }
-	voters: 'tga2025_voters' // formato: [{ name: string, initials: string }]
+	voters: 'tga2025_voters', // formato: [{ name: string, initials: string }]
+	sortOrder: 'tga2025_sortOrder' // formato: 'event' | 'alphabetical'
 };
 
 // carga/guarda
@@ -11,6 +12,7 @@ function loadState() {
 	const rawPred = localStorage.getItem(STORAGE_KEYS.predictions);
 	const rawWin = localStorage.getItem(STORAGE_KEYS.winners);
 	const rawVoters = localStorage.getItem(STORAGE_KEYS.voters);
+	const rawSort = localStorage.getItem(STORAGE_KEYS.sortOrder);
 	try {
 		// Si no hay voters guardados o está vacío, usar los predefinidos de VOTERS
 		let voters = rawVoters ? JSON.parse(rawVoters) : [];
@@ -22,17 +24,19 @@ function loadState() {
 		return {
 			predictions: rawPred ? JSON.parse(rawPred) : {},
 			winners: rawWin ? JSON.parse(rawWin) : {},
-			voters: voters
+			voters: voters,
+			sortOrder: rawSort || 'event'
 		}
 	} catch (e) {
 		console.error('Error parseando localStorage', e);
-		return { predictions: {}, winners: {}, voters: VOTERS };
+		return { predictions: {}, winners: {}, voters: VOTERS, sortOrder: 'event' };
 	}
 }
 function saveState(state) {
 	localStorage.setItem(STORAGE_KEYS.predictions, JSON.stringify(state.predictions));
 	localStorage.setItem(STORAGE_KEYS.winners, JSON.stringify(state.winners));
 	localStorage.setItem(STORAGE_KEYS.voters, JSON.stringify(state.voters));
+	localStorage.setItem(STORAGE_KEYS.sortOrder, state.sortOrder);
 }
 
 // inicializa
@@ -50,6 +54,15 @@ function getVoterName(initials) {
 		return `${customVoter.name} (${customVoter.initials})`;
 	}
 	return initials;
+}
+
+// Obtener categorías ordenadas según preferencia
+function getSortedCategories() {
+	let categories = [...CATEGORIES];
+	if (STATE.sortOrder === 'alphabetical') {
+		categories.sort((a, b) => a.title.localeCompare(b.title));
+	}
+	return categories;
 }
 
 // helpers
@@ -85,7 +98,8 @@ function updateRankingSidebar() {
 	Object.entries(scores).sort((a, b) => b[1] - a[1]).forEach(([name, pts]) => {
 		const item = document.createElement('div');
 		item.className = 'rank-item';
-		const displayName = getVoterName(name);
+		const customVoter = STATE.voters.find(v => v.initials === name);
+		const displayName = customVoter ? customVoter.name : name;
 		item.innerHTML = `<div><strong>${displayName}</strong></div><div class="rank-points">${pts} pts</div>`;
 		rankingContent.appendChild(item);
 	});
@@ -93,13 +107,31 @@ function updateRankingSidebar() {
 
 function renderNav(activeId) {
 	navEl.innerHTML = '';
+	
+	// Contenedor de enlaces fijos
+	const fixedLinks = document.createElement('div');
+	fixedLinks.className = 'nav-fixed';
+	
 	const home = document.createElement('a');
 	home.href = '#/';
 	home.className = activeId === 'home' ? 'active nav-link-row' : 'nav-link-row';
-	home.innerHTML = '<i data-lucide="trophy" class="lucide-icon"></i> Todas las categorías';
-	navEl.appendChild(home);
+	home.innerHTML = '<i data-lucide="trophy" class="lucide-icon"></i> Categorías';
+	fixedLinks.appendChild(home);
+	
+	const rank = document.createElement('a');
+	rank.href = '#/ranking';
+	rank.className = 'nav-link-row';
+	rank.innerHTML = '<i data-lucide="bar-chart-3" class="lucide-icon"></i> Desglose del ranking';
+	if (activeId === 'ranking') rank.classList.add('active');
+	fixedLinks.appendChild(rank);
+	
+	navEl.appendChild(fixedLinks);
+	
+	// Contenedor scrollable de categorías
+	const scrollableCategories = document.createElement('div');
+	scrollableCategories.className = 'nav-scrollable';
 
-	CATEGORIES.forEach(cat => {
+	getSortedCategories().forEach(cat => {
 		const a = document.createElement('a');
 		a.href = '#/category/' + cat.id;
 		a.className = 'nav-link-row';
@@ -128,15 +160,10 @@ function renderNav(activeId) {
 		a.appendChild(textSpan);
 		
 		if (cat.id === activeId) a.classList.add('active');
-		navEl.appendChild(a);
+		scrollableCategories.appendChild(a);
 	});
 
-	const rank = document.createElement('a');
-	rank.href = '#/ranking';
-	rank.className = 'nav-link-row';
-	rank.innerHTML = '<i data-lucide="bar-chart-3" class="lucide-icon"></i> Ranking';
-	if (activeId === 'ranking') rank.classList.add('active');
-	navEl.appendChild(rank);
+	navEl.appendChild(scrollableCategories);
 	
 	// Inicializar iconos de lucide
 	if (typeof lucide !== 'undefined') {
@@ -152,12 +179,26 @@ function renderHome() {
 	// Ocultar botón reset del header
 	document.getElementById('resetAll').style.display = 'none';
 	
-	// Header wrapper con botón reset
+	// Header wrapper con filtro y botón reset
 	const headerWrapper = document.createElement('div');
 	headerWrapper.className = 'header-wrapper';
 	
 	const h = document.createElement('h2');
-	h.textContent = 'Categorías';
+	h.innerHTML = '<i data-lucide="trophy" class="lucide-icon"></i> Categorías';
+	
+	const controlsWrapper = document.createElement('div');
+	controlsWrapper.style.display = 'flex';
+	controlsWrapper.style.gap = '12px';
+	controlsWrapper.style.alignItems = 'center';
+	
+	// Desplegable de ordenación
+	const sortSelect = document.createElement('select');
+	sortSelect.className = 'sort-select';
+	sortSelect.innerHTML = `
+		<option value="event">Ordenar por evento</option>
+		<option value="alphabetical">Ordenar alfabéticamente</option>
+	`;
+	sortSelect.value = STATE.sortOrder;
 	
 	const resetBtn = document.createElement('button');
 	resetBtn.className = 'winner-btn';
@@ -169,13 +210,27 @@ function renderHome() {
 		route();
 	});
 	
+	controlsWrapper.appendChild(sortSelect);
+	controlsWrapper.appendChild(resetBtn);
+	
 	headerWrapper.appendChild(h);
-	headerWrapper.appendChild(resetBtn);
+	headerWrapper.appendChild(controlsWrapper);
 	mainEl.appendChild(headerWrapper);
+	
+	// Inicializar iconos de lucide
+	if (typeof lucide !== 'undefined') {
+		lucide.createIcons();
+	}
 	
 	const list = document.createElement('div');
 	list.className = 'grid';
-	CATEGORIES.forEach(cat => {
+	
+	// Función para renderizar categorías
+	const renderCategories = (sortType) => {
+		list.innerHTML = '';
+		let categoriesToRender = getSortedCategories();
+		
+		categoriesToRender.forEach(cat => {
 		const card = document.createElement('a');
 		card.className = 'card';
 		card.href = '#/category/' + cat.id;
@@ -196,8 +251,20 @@ function renderHome() {
 		m.appendChild(title); m.appendChild(info);
 		card.appendChild(m);
 		list.appendChild(card);
-	});
+		});
+	};
+	
+	// Renderizar inicialmente
+	renderCategories(STATE.sortOrder);
 	mainEl.appendChild(list);
+	
+	// Event listener para el cambio de ordenación
+	sortSelect.addEventListener('change', (e) => {
+		STATE.sortOrder = e.target.value;
+		saveState(STATE);
+		renderCategories(STATE.sortOrder);
+		renderNav('home'); // Actualizar nav con nuevo orden
+	});
 }
 
 function renderCategory(catId) {
@@ -215,9 +282,10 @@ function renderCategory(catId) {
 	const header = document.createElement('div'); header.className = 'category-header';
 	
 	// Navegación entre categorías
-	const currentIndex = CATEGORIES.findIndex(c => c.id === catId);
-	const prevCat = currentIndex > 0 ? CATEGORIES[currentIndex - 1] : null;
-	const nextCat = currentIndex < CATEGORIES.length - 1 ? CATEGORIES[currentIndex + 1] : null;
+	const sortedCategories = getSortedCategories();
+	const currentIndex = sortedCategories.findIndex(c => c.id === catId);
+	const prevCat = currentIndex > 0 ? sortedCategories[currentIndex - 1] : null;
+	const nextCat = currentIndex < sortedCategories.length - 1 ? sortedCategories[currentIndex + 1] : null;
 	
 	const navButtons = document.createElement('div'); navButtons.className = 'category-nav';
 	
@@ -362,15 +430,18 @@ function renderRanking() {
 	document.getElementById('resetAll').style.display = 'none';
 	
 	const h = document.createElement('h2'); 
-	h.textContent = 'Desglose por categoría (aciertos)';
-	h.style.marginBottom = '32px';
-	h.style.paddingBottom = '24px';
-	h.style.borderBottom = '1px solid rgba(255, 255, 255, 0.06)';
+	h.className = 'page-title';
+	h.innerHTML = '<i data-lucide="bar-chart-3" class="lucide-icon"></i> Desglose del ranking';
 	mainEl.appendChild(h);
+	
+	// Inicializar iconos de lucide
+	if (typeof lucide !== 'undefined') {
+		lucide.createIcons();
+	}
 
 	// breakdown per category
 	const breakdown = document.createElement('div'); breakdown.className = 'ranking-breakdown';
-	CATEGORIES.forEach(cat => {
+	getSortedCategories().forEach(cat => {
 		const row = document.createElement('div'); row.className = 'ranking-breakdown-category';
 		const w = STATE.winners[cat.id];
 		const total = document.createElement('p'); total.className = 'category-winner-label';
