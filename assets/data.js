@@ -314,3 +314,256 @@ const VOTERS = [
   { name: 'Jordi', initials: 'JOR' },
   { name: 'Antonio', initials: 'ANT' }
 ];
+
+const BINGO = [
+    {
+      "id": 1,
+      "categoria": "Vestimenta",
+      "texto": "Zapatillas deportivas con traje de gala"
+    },
+    {
+      "id": 2,
+      "categoria": "Vestimenta",
+      "texto": "Gafas de sol en interiores (Kojima Style)"
+    },
+    {
+      "id": 3,
+      "categoria": "Vestimenta",
+      "texto": "Pelo teñido de color fantasía/neón"
+    },
+    {
+      "id": 4,
+      "categoria": "Vestimenta",
+      "texto": "Desarrollador con camiseta de su propio juego"
+    },
+    {
+      "id": 5,
+      "categoria": "Vestimenta",
+      "texto": "Escote o traje censurable en TV"
+    },
+    {
+      "id": 6,
+      "categoria": "Vestimenta",
+      "texto": "Chaqueta con lentejuelas o brillo excesivo"
+    },
+    {
+      "id": 7,
+      "categoria": "Vestimenta",
+      "texto": "Presentador o músico haciendo Cosplay"
+    },
+    {
+      "id": 8,
+      "categoria": "Vestimenta",
+      "texto": "Geoff Keighley se cambia de ropa a mitad de gala"
+    },
+    {
+      "id": 9,
+      "categoria": "Vestimenta",
+      "texto": "Alguien lleva sombrero/gorra y no se la quita"
+    },
+    {
+      "id": 10,
+      "categoria": "Vestimenta",
+      "texto": "Pin o parche con mensaje reivindicativo"
+    },
+    {
+      "id": 11,
+      "categoria": "Discursos",
+      "texto": "El Séquito: Suben más de 10 personas a recoger un premio"
+    },
+    {
+      "id": 12,
+      "categoria": "Discursos",
+      "texto": "El Lobo Solitario: Sube solo una persona de un estudio AAA"
+    },
+    {
+      "id": 13,
+      "categoria": "Discursos",
+      "texto": "Ganador leyendo discurso desde el móvil"
+    },
+    {
+      "id": 14,
+      "categoria": "Discursos",
+      "texto": "Ganador saca un papel muy arrugado del bolsillo"
+    },
+    {
+      "id": 15,
+      "categoria": "Discursos",
+      "texto": "Dicen textualmente: 'No me lo esperaba/No preparé nada'"
+    },
+    {
+      "id": 16,
+      "categoria": "Discursos",
+      "texto": "Llantos reales en el escenario"
+    },
+    {
+      "id": 17,
+      "categoria": "Discursos",
+      "texto": "Agradecimiento a una mascota (perro/gato)"
+    },
+    {
+      "id": 18,
+      "categoria": "Discursos",
+      "texto": "Music'd: La orquesta corta el discurso por largo"
+    },
+    {
+      "id": 19,
+      "categoria": "Discursos",
+      "texto": "Discurso Speedrun por nervios (ininteligible)"
+    },
+    {
+      "id": 20,
+      "categoria": "Discursos",
+      "texto": "El micrófono está a mala altura (se agachan o estiran)"
+    },
+    {
+      "id": 21,
+      "categoria": "Discursos",
+      "texto": "Abrazo incómodo o fallido en el escenario"
+    },
+    {
+      "id": 22,
+      "categoria": "Producción",
+      "texto": "Cámara capta a alguien del público aburrido o en el móvil"
+    },
+    {
+      "id": 23,
+      "categoria": "Producción",
+      "texto": "Gritos del público exagerados/falsos"
+    },
+    {
+      "id": 24,
+      "categoria": "Producción",
+      "texto": "Fallo de audio (micrófono apagado o acople)"
+    },
+    {
+      "id": 25,
+      "categoria": "Producción",
+      "texto": "Zoom dramático a la cara de un perdedor"
+    },
+    {
+      "id": 26,
+      "categoria": "Producción",
+      "texto": "Seguridad tensa por posible espontáneo (Bill Clinton check)"
+    },
+    {
+      "id": 27,
+      "categoria": "Producción",
+      "texto": "Actuación musical que no pinta nada con videojuegos"
+    },
+    {
+      "id": 28,
+      "categoria": "Producción",
+      "texto": "Primer plano al solista de viento (Flute Guy)"
+    },
+    {
+      "id": 29,
+      "categoria": "Producción",
+      "texto": "Lectura descarada del Teleprompter (ojos moviéndose)"
+    },
+    {
+      "id": 30,
+      "categoria": "Producción",
+      "texto": "Chiste malo (Cringe) seguido de silencio sepulcral"
+    },
+    {
+      "id": 31,
+      "categoria": "Tráilers",
+      "texto": "Tráiler 0% Gameplay (Solo CGI)"
+    },
+    {
+      "id": 32,
+      "categoria": "Tráilers",
+      "texto": "Letra pequeña: 'Captured on PC' / 'Not actual gameplay'"
+    },
+    {
+      "id": 33,
+      "categoria": "Tráilers",
+      "texto": "Fecha de lanzamiento lejana (2027+) o 'Coming Soon'"
+    },
+    {
+      "id": 34,
+      "categoria": "Tráilers",
+      "texto": "Anuncio de Remake/Remaster innecesario"
+    },
+    {
+      "id": 35,
+      "categoria": "Tráilers",
+      "texto": "Juego como Servicio (GaaS) disfrazado de juego normal"
+    },
+    {
+      "id": 36,
+      "categoria": "Tráilers",
+      "texto": "Juego con estética Anime/Gacha genérica"
+    },
+    {
+      "id": 37,
+      "categoria": "Tráilers",
+      "texto": "Juego de terror espacial genérico"
+    },
+    {
+      "id": 38,
+      "categoria": "Tráilers",
+      "texto": "Aparece un Youtuber/Streamer famoso en el juego"
+    },
+    {
+      "id": 39,
+      "categoria": "Tráilers",
+      "texto": "Tráiler confuso que parece de Kojima pero no lo es"
+    },
+    {
+      "id": 40,
+      "categoria": "Tráilers",
+      "texto": "Primer plano del logo de Unreal Engine 5"
+    },
+    {
+      "id": 41,
+      "categoria": "Geoff y Clichés",
+      "texto": "Geoff llama 'My friend' a un famoso"
+    },
+    {
+      "id": 42,
+      "categoria": "Geoff y Clichés",
+      "texto": "Publicidad encubierta (Bebidas, comida, afeitadoras)"
+    },
+    {
+      "id": 43,
+      "categoria": "Geoff y Clichés",
+      "texto": "Mención a la 'Inteligencia Artificial' (AI)"
+    },
+    {
+      "id": 44,
+      "categoria": "Geoff y Clichés",
+      "texto": "Ignoran totalmente la crisis de despidos del sector"
+    },
+    {
+      "id": 45,
+      "categoria": "Geoff y Clichés",
+      "texto": "Premio importante entregado rápido en el Pre-show"
+    },
+    {
+      "id": 46,
+      "categoria": "Geoff y Clichés",
+      "texto": "Actor de Hollywood presentando que no sabe dónde está"
+    },
+    {
+      "id": 47,
+      "categoria": "Geoff y Clichés",
+      "texto": "Shadow Drop: 'Disponible ahora mismo'"
+    },
+    {
+      "id": 48,
+      "categoria": "Geoff y Clichés",
+      "texto": "Referencia a serie de TV (Fallout, TLOU, Arcane)"
+    },
+    {
+      "id": 49,
+      "categoria": "Geoff y Clichés",
+      "texto": "Baity se enfada/grita por un ganador injusto"
+    },
+    {
+      "id": 50,
+      "categoria": "Geoff y Clichés",
+      "texto": "Geoff interrumpe a alguien para seguir con el show"
+    }
+  ]

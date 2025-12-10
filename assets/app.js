@@ -5,7 +5,8 @@ const STORAGE_KEYS = {
 	winners: 'tga2025_winners', // formato: { categoryId: gameId }
 	voters: 'tga2025_voters', // formato: [{ name: string, initials: string }]
 	sortOrder: 'tga2025_sortOrder', // formato: 'event' | 'alphabetical'
-	theme: 'tga2025_theme' // formato: 'dark' | 'light'
+	theme: 'tga2025_theme', // formato: 'dark' | 'light'
+	bingo: 'tga2025_bingo' // formato: { voterInitials: [{ id, text, completed }] }
 };
 
 // carga/guarda
@@ -80,6 +81,7 @@ const rankingContent = document.getElementById('rankingContent');
 
 function updateRankingSidebar() {
 	const scores = computeScores();
+	const bingoData = loadBingoData();
 	rankingContent.innerHTML = '';
 	
 	if (getVoters().length === 0) {
@@ -96,6 +98,31 @@ function updateRankingSidebar() {
 		return;
 	}
 	
+	// Mostrar líder de Bingo si estamos en la página de Bingo
+	const currentHash = location.hash || '#/';
+	if (currentHash.startsWith('#/bingo')) {
+		const bingoScores = {};
+		STATE.voters.forEach(voter => {
+			bingoScores[voter.initials] = {
+				completed: getBingoCount(bingoData, voter.initials),
+				total: getBingoTotal(bingoData, voter.initials)
+			};
+		});
+		
+		const sortedBingo = Object.entries(bingoScores).sort((a, b) => b[1].completed - a[1].completed);
+		
+		sortedBingo.forEach(([initials, counts]) => {
+			const item = document.createElement('div');
+			item.className = 'rank-item';
+			const customVoter = STATE.voters.find(v => v.initials === initials);
+			const displayName = customVoter ? customVoter.name : initials;
+			item.innerHTML = `<div><strong>${displayName}</strong></div><div class="rank-points">${counts.completed}/${counts.total}</div>`;
+			rankingContent.appendChild(item);
+		});
+		return;
+	}
+	
+	// Ranking normal por puntos de predicciones
 	Object.entries(scores).sort((a, b) => b[1] - a[1]).forEach(([name, pts]) => {
 		const item = document.createElement('div');
 		item.className = 'rank-item';
@@ -125,6 +152,13 @@ function renderNav(activeId) {
 	rank.innerHTML = '<i data-lucide="bar-chart-3" class="lucide-icon"></i> Desglose del ranking';
 	if (activeId === 'ranking') rank.classList.add('active');
 	fixedLinks.appendChild(rank);
+	
+	const bingo = document.createElement('a');
+	bingo.href = '#/bingo';
+	bingo.className = 'nav-link-row';
+	bingo.innerHTML = '<i data-lucide="grid-3x3" class="lucide-icon"></i> Bingo';
+	if (activeId === 'bingo') bingo.classList.add('active');
+	fixedLinks.appendChild(bingo);
 	
 	navEl.appendChild(fixedLinks);
 	
@@ -386,15 +420,25 @@ function renderCategory(catId) {
 			voterChip.setAttribute('data-voter', voter);
 			voterChip.addEventListener('click', (e) => {
 				e.stopPropagation();
+				e.preventDefault();
+				
 				// Toggle prediction
 				STATE.predictions[catId] = STATE.predictions[catId] || {};
-				if (STATE.predictions[catId][voter] === gid) {
+				const wasActive = STATE.predictions[catId][voter] === gid;
+				
+				if (wasActive) {
 					delete STATE.predictions[catId][voter];
+					voterChip.classList.remove('active');
 				} else {
+					// Remover active de todos los chips de este votante en esta categoría
+					document.querySelectorAll(`.voter-chip[data-voter="${voter}"]`).forEach(chip => {
+						chip.classList.remove('active');
+					});
 					STATE.predictions[catId][voter] = gid;
+					voterChip.classList.add('active');
 				}
 				saveState(STATE);
-				renderCategory(catId);
+				updateRankingSidebar();
 			});
 			predictions.appendChild(voterChip);
 		});
@@ -519,19 +563,249 @@ function computeScores() {
 function guessNameFromId(id) {
 	// busca el nombre en las categorías
 	for (const cat of CATEGORIES) {
-		for (const g of cat.games) { if (g.id === id) return g.name || prettifyId(g.id); }
+		const found = cat.games.find(g => g.id === id);
+		if (found && found.name) return found.name;
 	}
-	return prettifyId(id);
+	return id;
 }
-function prettifyId(id) { return id.replace(/[_-]/g, ' ').replace(/\b\w/g, c => c.toUpperCase()); }
 
-// router simple
+function renderBingo() {
+	renderNav('bingo');
+	updateRankingSidebar();
+	mainEl.innerHTML = '';
+	
+	// Ocultar botón reset del header
+	document.getElementById('resetAll').style.display = 'none';
+	
+	const h = document.createElement('h2'); 
+	h.className = 'page-title';
+	h.innerHTML = '<i data-lucide="grid-3x3" class="lucide-icon"></i> Bingo';
+	mainEl.appendChild(h);
+	
+	// Inicializar iconos de lucide
+	if (typeof lucide !== 'undefined') {
+		lucide.createIcons();
+	}
+
+	// Cargar datos de bingo del localStorage
+	const bingoData = loadBingoData();
+	
+	// Contenedor de las 4 columnas
+	const bingoGrid = document.createElement('div');
+	bingoGrid.className = 'bingo-grid';
+	
+	STATE.voters.forEach(voter => {
+		const column = document.createElement('div');
+		column.className = 'bingo-column';
+		
+		// Header de la columna con nombre del votante
+		const columnHeader = document.createElement('div');
+		columnHeader.className = 'bingo-column-header';
+		const totalItems = getBingoTotal(bingoData, voter.initials);
+		const completedItems = getBingoCount(bingoData, voter.initials);
+		columnHeader.innerHTML = `<h3>${voter.name}</h3><span class="bingo-count">${completedItems}/${totalItems}</span>`;
+		column.appendChild(columnHeader);
+		
+		// Selector de opciones BINGO
+		const selectorContainer = document.createElement('div');
+		selectorContainer.className = 'bingo-selector-container';
+		
+		const select = document.createElement('select');
+		select.className = 'bingo-item-selector';
+		select.innerHTML = '<option value="">Seleccionar opción...</option>';
+		
+		// Agrupar opciones por categoría
+		const categories = [...new Set(BINGO.map(item => item.categoria))];
+		categories.forEach(categoria => {
+			const optgroup = document.createElement('optgroup');
+			optgroup.label = categoria;
+			BINGO.filter(item => item.categoria === categoria).forEach(item => {
+				const option = document.createElement('option');
+				option.value = item.id;
+				option.textContent = item.texto;
+				// Deshabilitar si ya está seleccionada
+				if (isItemSelected(bingoData, voter.initials, item.id)) {
+					option.disabled = true;
+					option.textContent += ' ✓';
+				}
+				optgroup.appendChild(option);
+			});
+			select.appendChild(optgroup);
+		});
+		
+		select.addEventListener('change', (e) => {
+			const itemId = parseInt(e.target.value);
+			if (!itemId) return;
+			
+			// Verificar límite de 10 items
+			const currentItems = bingoData[voter.initials] || [];
+			if (currentItems.length >= 10) {
+				alert('Ya has seleccionado 10 opciones. Elimina alguna para añadir otra.');
+				e.target.value = '';
+				return;
+			}
+			
+			const bingoItem = BINGO.find(b => b.id === itemId);
+			if (bingoItem) {
+				addBingoItem(bingoData, voter.initials, {
+					id: bingoItem.id,
+					text: bingoItem.texto,
+					completed: false
+				});
+				saveBingoData(bingoData);
+				renderBingo();
+			}
+		});
+		
+		selectorContainer.appendChild(select);
+		column.appendChild(selectorContainer);
+		
+		// Input para opciones personalizadas
+		const customContainer = document.createElement('div');
+		customContainer.className = 'bingo-custom-container';
+		
+		const customInput = document.createElement('input');
+		customInput.type = 'text';
+		customInput.className = 'bingo-custom-input';
+		customInput.placeholder = 'Añadir opción personalizada...';
+		
+		const customBtn = document.createElement('button');
+		customBtn.className = 'bingo-custom-btn';
+		customBtn.innerHTML = '<i data-lucide="plus" class="lucide-icon-sm"></i>';
+		
+		customBtn.addEventListener('click', () => {
+			const customText = customInput.value.trim();
+			if (!customText) return;
+			
+			// Verificar límite de 10 items
+			const currentItems = bingoData[voter.initials] || [];
+			if (currentItems.length >= 10) {
+				alert('Ya has seleccionado 10 opciones. Elimina alguna para añadir otra.');
+				return;
+			}
+			
+			// Crear ID único para item personalizado (negativo para distinguir)
+			const customId = -Date.now();
+			addBingoItem(bingoData, voter.initials, {
+				id: customId,
+				text: customText,
+				completed: false
+			});
+			saveBingoData(bingoData);
+			customInput.value = '';
+			renderBingo();
+		});
+		
+		customContainer.appendChild(customInput);
+		customContainer.appendChild(customBtn);
+		column.appendChild(customContainer);
+		
+		// Lista de items seleccionados
+		const itemsList = document.createElement('div');
+		itemsList.className = 'bingo-items-list';
+		
+		const userItems = bingoData[voter.initials] || [];
+		userItems.forEach((item, index) => {
+			const itemDiv = document.createElement('div');
+			itemDiv.className = 'bingo-item' + (item.completed ? ' completed' : '');
+			
+			const checkbox = document.createElement('input');
+			checkbox.type = 'checkbox';
+			checkbox.className = 'bingo-checkbox';
+			checkbox.checked = item.completed;
+			checkbox.addEventListener('change', (e) => {
+				toggleBingoItem(bingoData, voter.initials, index, e.target.checked);
+				saveBingoData(bingoData);
+				renderBingo();
+			});
+			
+			const label = document.createElement('label');
+			label.className = 'bingo-label';
+			label.textContent = item.text;
+			
+			const deleteBtn = document.createElement('button');
+			deleteBtn.className = 'bingo-delete-btn';
+			deleteBtn.innerHTML = '<i data-lucide="x" class="lucide-icon-sm"></i>';
+			deleteBtn.addEventListener('click', () => {
+				deleteBingoItem(bingoData, voter.initials, index);
+				saveBingoData(bingoData);
+				renderBingo();
+			});
+			
+			itemDiv.appendChild(checkbox);
+			itemDiv.appendChild(label);
+			itemDiv.appendChild(deleteBtn);
+			itemsList.appendChild(itemDiv);
+		});
+		
+		column.appendChild(itemsList);
+		bingoGrid.appendChild(column);
+	});
+	
+	mainEl.appendChild(bingoGrid);
+	
+	// Inicializar iconos de lucide al final
+	if (typeof lucide !== 'undefined') {
+		lucide.createIcons();
+	}
+}
+
+// Funciones auxiliares para Bingo
+function loadBingoData() {
+	const raw = localStorage.getItem(STORAGE_KEYS.bingo);
+	try {
+		return raw ? JSON.parse(raw) : {};
+	} catch (e) {
+		return {};
+	}
+}
+
+function saveBingoData(data) {
+	localStorage.setItem(STORAGE_KEYS.bingo, JSON.stringify(data));
+}
+
+function addBingoItem(data, voterInitials, item) {
+	if (!data[voterInitials]) {
+		data[voterInitials] = [];
+	}
+	data[voterInitials].push(item);
+}
+
+function deleteBingoItem(data, voterInitials, index) {
+	if (data[voterInitials]) {
+		data[voterInitials].splice(index, 1);
+	}
+}
+
+function toggleBingoItem(data, voterInitials, index, completed) {
+	if (data[voterInitials] && data[voterInitials][index]) {
+		data[voterInitials][index].completed = completed;
+	}
+}
+
+function isItemSelected(data, voterInitials, itemId) {
+	const items = data[voterInitials] || [];
+	return items.some(item => item.id === itemId);
+}
+
+function getBingoCount(data, voterInitials) {
+	const items = data[voterInitials] || [];
+	return items.filter(item => item.completed).length;
+}
+
+function getBingoTotal(data, voterInitials) {
+	const items = data[voterInitials] || [];
+	return items.length;
+}
+
 function route() {
 	const hash = location.hash || '#/';
 	if (hash.startsWith('#/category/')) {
 		const cid = hash.split('/')[2]; renderCategory(cid);
 	} else if (hash.startsWith('#/ranking')) {
 		renderRanking();
+	} else if (hash.startsWith('#/bingo')) {
+		renderBingo();
 	} else {
 		renderHome();
 	}
